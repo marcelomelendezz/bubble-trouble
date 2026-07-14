@@ -3,435 +3,784 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Semillas Eternas</title>
+<title>Burbujitas</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;user-select:none;}
-#app{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  width:100%;height:100%;
-  background:radial-gradient(ellipse at 30% 20%,#1a3a2a 0%,#0a1f14 50%,#050f0a 100%);
-  font-family:'Nunito',sans-serif;
-}
+html,body{width:100%;height:100%;overflow:hidden;background:#eef7ea;user-select:none;}
+#app{display:flex;flex-direction:column;width:100%;height:100%;font-family:'Trebuchet MS','Verdana',sans-serif;}
+
 #hud{
-  width:100%;max-width:400px;display:flex;align-items:center;
-  justify-content:space-between;padding:6px 12px 6px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+  padding:4px 12px;background:rgba(255,248,236,0.97);border-bottom:2px solid #7cb342;
+  font-size:11px;letter-spacing:1px;
 }
-.sbox{
-  background:rgba(255,255,255,0.07);border:1.5px solid rgba(74,222,128,0.2);
-  border-radius:12px;padding:4px 14px;text-align:center;min-width:72px;
-}
-.sbox .lbl{font-size:8px;color:rgba(255,255,255,0.45);letter-spacing:2px;font-weight:800;}
-.sbox .val{font-size:20px;color:#fff;font-weight:900;line-height:1.2;transition:transform 0.15s;}
-.sbox .val.bump{animation:bump 0.2s ease;}
-@keyframes bump{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
-.title{
-  font-size:28px;font-weight:900;
-  background:linear-gradient(135deg,#4ade80,#ca8a04,#67e8f9);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 14px rgba(74,222,128,0.4));
-}
+#hud .score{color:#e0a83e;font-size:14px;font-weight:bold;}
+#hud .title{color:#ff6f91;font-size:10px;letter-spacing:2px;font-weight:bold;}
+#hud .lives-wrap{display:flex;gap:4px;align-items:center;}
+.life{font-size:16px;color:#ff6f91;}
 
-/* BOARD */
-#board{
-  position:relative;
-  background:rgba(60,90,70,0.08);
-  border:1.5px solid rgba(74,222,128,0.15);
-  border-radius:18px;
-  box-shadow:0 10px 50px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.06);
-  touch-action:none;flex-shrink:0;
-}
+#cw{flex:1;min-height:0;position:relative;overflow:hidden;}
+canvas{display:block;touch-action:none;outline:none;}
 
-/* empty cells - soil patches */
-.ecell{
-  position:absolute;
-  background:rgba(40,70,55,0.25);
-  border:1.5px solid rgba(74,222,128,0.08);
-  border-radius:12px;
-}
-
-/* TILES - plant growth styles */
-.tile{
-  position:absolute;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:14px;font-weight:900;
-  box-shadow:0 4px 14px rgba(0,0,0,0.35);
-}
-.tile.moving{
-  transition:left 0.13s cubic-bezier(0.3,0,0.2,1),
-             top  0.13s cubic-bezier(0.3,0,0.2,1);
-}
-.tile.spawn{animation:spawn 0.18s cubic-bezier(0.34,1.56,0.64,1) both;animation-delay:0.1s;}
-.tile.mergeflash{animation:mergeflash 0.22s cubic-bezier(0.34,1.56,0.64,1) both;animation-delay:0.1s;}
-@keyframes spawn{0%{transform:scale(0.6);opacity:0}100%{transform:scale(1);opacity:1}}
-@keyframes mergeflash{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
-
-/* CONTROLS */
 #controls{
-  display:grid;grid-template-columns:54px 54px 54px;
-  grid-template-rows:46px 46px;gap:6px;margin-top:10px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+  padding:5px 16px 6px;background:rgba(255,248,236,0.97);border-top:2px solid #7cb342;
+  gap:8px;
 }
-.dbtn{
-  background:rgba(255,255,255,0.06);border:1.5px solid rgba(74,222,128,0.2);
-  border-radius:12px;color:rgba(255,255,255,0.7);font-size:20px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;touch-action:manipulation;
+.cbtn{
+  width:64px;height:50px;border-radius:12px;cursor:pointer;font-size:22px;
+  background:rgba(124,179,66,0.18);border:2px solid rgba(124,179,66,0.4);
+  color:#5a8f2e;display:flex;align-items:center;justify-content:center;
+  touch-action:manipulation;transition:all 0.07s;
+}
+.cbtn:active,.cbtn.pressed{background:rgba(124,179,66,0.4);border-color:#5a8f2e;transform:scale(0.93);}
+#dardoBtn{
+  width:72px;height:72px;border-radius:50%;
+  background:radial-gradient(circle,#ffcf5c,#e0a83e);
+  border:3px solid #fff2cf;box-shadow:0 0 20px rgba(224,168,62,0.6);
+  font-size:26px;color:#5a3d10;cursor:pointer;touch-action:manipulation;
   transition:all 0.07s;
 }
-.dbtn:active,.dbtn.pressed{background:rgba(74,222,128,0.25);color:#fff;transform:scale(0.92);}
-
-/* OVERLAY */
-#overlay{
-  display:none;position:absolute;inset:0;z-index:50;
-  background:rgba(5,15,10,0.88);backdrop-filter:blur(8px);
-  align-items:center;justify-content:center;flex-direction:column;gap:14px;
-  border-radius:18px;
-}
-#overlay.show{display:flex;}
-.ov-title{font-size:clamp(22px,6.5vw,34px);font-weight:900;text-align:center;}
-.ov-score{font-size:clamp(15px,3.8vw,22px);font-weight:900;color:#ca8a04;}
-.ov-btn{
-  padding:10px 28px;border-radius:14px;cursor:pointer;font-size:15px;font-weight:900;
-  font-family:'Nunito',sans-serif;border:none;
-  background:linear-gradient(135deg,#4ade80,#ca8a04);color:#0a1f14;
-  box-shadow:0 4px 18px rgba(74,222,128,0.45);
-}
-.ov-btn:active{transform:scale(0.95);}
-
-/* score float */
-.sfloat{
-  position:fixed;font-size:15px;font-weight:900;color:#ca8a04;pointer-events:none;z-index:200;
-  text-shadow:0 0 8px rgba(202,138,4,0.8);
-  animation:sfloat 0.9s ease-out forwards;
-}
-@keyframes sfloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-55px)}}
+#dardoBtn:active{transform:scale(0.92);box-shadow:0 0 8px rgba(224,168,62,0.3);}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="hud">
-    <div class="sbox"><div class="lbl">VITALIDAD</div><div class="val" id="scoreEl">0</div></div>
-    <div class="title">Semillas Eternas</div>
-    <div class="sbox"><div class="lbl">MÁXIMO</div><div class="val" id="bestEl">0</div></div>
+    <div class="score">✦ <span id="scoreEl">0</span></div>
+    <div class="title">🌼 BURBUJITAS</div>
+    <div class="lives-wrap" id="livesEl"></div>
   </div>
-
-  <div id="board">
-    <div id="overlay">
-      <div class="ov-title" id="ovTitle"></div>
-      <div class="ov-score" id="ovScore"></div>
-      <button class="ov-btn" id="ovBtn">🌱 Cultivar otra vez</button>
-    </div>
-  </div>
-
+  <div id="cw"><canvas id="c" tabindex="0"></canvas></div>
   <div id="controls">
-    <div></div>
-    <button class="dbtn" id="btnU">▲</button>
-    <div></div>
-    <button class="dbtn" id="btnL">◀</button>
-    <button class="dbtn" id="btnD">▼</button>
-    <button class="dbtn" id="btnR">▶</button>
+    <button class="cbtn" id="btnL">◀</button>
+    <button id="dardoBtn">↑</button>
+    <button class="cbtn" id="btnR">▶</button>
   </div>
 </div>
-
 <script>
-// ── ESTILOS DE CRECIMIENTO ─────────────────────────────────
-const CRECIMIENTO_STYLE = {
-  2:    {bg:'rgba(180,220,160,0.95)', fg:'#2d5a2d', sh:''},
-  4:    {bg:'rgba(140,200,130,0.95)', fg:'#1f4a1f', sh:''},
-  8:    {bg:'#4ade80',               fg:'#0a2a12', sh:'0 0 16px rgba(74,222,128,0.5)'},
-  16:   {bg:'#22c55e',               fg:'#05240f', sh:'0 0 18px rgba(34,197,94,0.55)'},
-  32:   {bg:'#16a34a',               fg:'#fff',     sh:'0 0 20px rgba(22,163,74,0.6)'},
-  64:   {bg:'#ca8a04',               fg:'#fff',     sh:'0 0 22px rgba(202,138,4,0.6)'},
-  128:  {bg:'linear-gradient(135deg,#4ade80,#ca8a04)', fg:'#0a2a12', sh:'0 0 26px rgba(74,222,128,0.65)'},
-  256:  {bg:'linear-gradient(135deg,#67e8f9,#4ade80)', fg:'#0a2a12', sh:'0 0 26px rgba(103,232,249,0.6)'},
-  512:  {bg:'linear-gradient(135deg,#ca8a04,#f59e0b)', fg:'#0a2a12', sh:'0 0 30px rgba(202,138,4,0.7)'},
-  1024: {bg:'linear-gradient(135deg,#4ade80,#eab308)', fg:'#05240f', sh:'0 0 34px rgba(74,222,128,0.75)'},
-  2048: {bg:'linear-gradient(135deg,#ca8a04,#4ade80,#fef08c)', fg:'#0a2a12', sh:'0 0 42px rgba(202,138,4,0.9)'},
-};
-function getCrecimientoStyle(v){ return CRECIMIENTO_STYLE[v]||{bg:'linear-gradient(135deg,#166534,#4ade80)',fg:'#fff',sh:'0 0 28px rgba(74,222,128,0.7)'}; }
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const cw     = document.getElementById('cw');
 
-// ── LAYOUT ────────────────────────────────────────────────
-const N=4, ANIM_MS=130;
-const board    = document.getElementById('board');
-const overlay  = document.getElementById('overlay');
-let CELL, PAD, GAP;
-
-function layout(){
-  const app   = document.getElementById('app');
-  const hud   = document.getElementById('hud');
-  const ctrl  = document.getElementById('controls');
-  const appW  = app.clientWidth;
-  const appH  = app.clientHeight;
-  const hudH  = hud.offsetHeight||52;
-  const ctrlH = ctrl.offsetHeight||110;
-  const avail = Math.min(appW - 20, appH - hudH - ctrlH - 28);
-  PAD  = Math.max(8,  Math.floor(avail * 0.032));
-  GAP  = Math.max(6,  Math.floor(avail * 0.024));
-  CELL = Math.floor((avail - PAD*2 - GAP*(N-1)) / N);
-  const bSize = PAD*2 + CELL*N + GAP*(N-1);
-  board.style.width  = bSize+'px';
-  board.style.height = bSize+'px';
-  buildEmptyCells();
+let W, H;
+function resize(){
+  W = canvas.width  = cw.clientWidth;
+  H = canvas.height = cw.clientHeight;
 }
 
-function buildEmptyCells(){
-  board.querySelectorAll('.ecell').forEach(e=>e.remove());
-  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
-    const d=document.createElement('div');
-    d.className='ecell';
-    Object.assign(d.style,{left:tileX(c)+'px',top:tileY(r)+'px',width:CELL+'px',height:CELL+'px'});
-    board.appendChild(d);
-  }
-}
+// ── CONSTANTS ────────────────────────────────────────────
+const GRAVITY   = () => H * 0.00042;
 
-function tileX(c){ return PAD + c*(CELL+GAP); }
-function tileY(r){ return PAD + r*(CELL+GAP); }
+// ── MEJORAS (power-ups) ───────────────────────────────────
+// se desbloquean progresivamente por ronda
+const MEJORAS = [
+  { id:'doble',     icon:'⟳', label:'DOBLE',     color:'#4a90b8', desc:'2 dardos a la vez',      minLevel:3  },
+  { id:'ancho',     icon:'↔', label:'ANCHO',     color:'#e0a83e', desc:'Dardo ancho',             minLevel:4  },
+  { id:'brisa',     icon:'❄', label:'BRISA',     color:'#7ec8e3', desc:'Calma las gotas 3s',      minLevel:5  },
+  { id:'rapido',    icon:'⚡', label:'RÁPIDO',    color:'#f4e04d', desc:'Disparo rápido',          minLevel:6  },
+  { id:'rayo',      icon:'☄', label:'RAYO',      color:'#e05a76', desc:'Rompe todas en línea',    minLevel:7  },
+  { id:'estallido', icon:'✺', label:'ESTALLIDO', color:'#ff8f4d', desc:'Explota área',             minLevel:9  },
+];
 
-// ── GAME STATE ────────────────────────────────────────────
-let grid, score, best, busy;
-let tileEls = {};
-let nextId  = 0;
+let activeMejora  = null;   // {id, timer}
+let mejoraPickups = [];     // recolectables en pantalla {x,y,type,vy,life}
+let calmTimer     = 0;      // duración del efecto "brisa"
+let dardos        = [];     // dardos activos (soporta 2 con mejora "doble")
+const PLAYER_W  = 28;
+const PLAYER_H  = 36;
+const FLOOR_Y   = () => H - 2;
+const DARDO_SPD = () => H * 0.018;
+const MOVE_SPD  = () => W * 0.007;
+const TICK_MS   = 16;
 
-function cellId(){ return nextId++; }
+// Tamaños de gota: radio + velocidad de rebote
+const DROP_SIZES = [
+  { r: ()=>Math.min(W,H)*0.13,  bounceVy: ()=>H*0.022, pts: 10  },  // 0 = más grande
+  { r: ()=>Math.min(W,H)*0.085, bounceVy: ()=>H*0.026, pts: 20  },  // 1
+  { r: ()=>Math.min(W,H)*0.052, bounceVy: ()=>H*0.030, pts: 40  },  // 2
+  { r: ()=>Math.min(W,H)*0.030, bounceVy: ()=>H*0.034, pts: 80  },  // 3 = más pequeña
+];
+
+const DROP_COLORS = [
+  ['#ff8fa3','#ffc2d1','#e05a76'],
+  ['#ffd166','#ffe8b0','#e0a83e'],
+  ['#7ec8e3','#bfe6ff','#4a90b8'],
+  ['#7bd8a0','#b8f2cf','#4aa876'],
+  ['#c39bd3','#e6d0f0','#9b6bb3'],
+  ['#f4e04d','#faf3a0','#c9b62e'],
+];
+
+// ── STATE ────────────────────────────────────────────────
+let player;
+let drops = [], particles = [];
+let score=0, lives=3, level=1;
+let gameState = 'start';
+let stateTimer = 120;
+let gameInterval;
+let keys = {};
 
 function initGame(){
-  grid  = Array.from({length:N},()=>Array(N).fill(null));
-  score = 0; busy = false;
-  best  = parseInt(localStorage.getItem('semillasBest')||'0');
-  setScore(0);
-  document.getElementById('bestEl').textContent = best;
-  overlay.classList.remove('show');
-  board.querySelectorAll('.tile').forEach(e=>e.remove());
-  tileEls = {}; nextId = 0;
-  spawnRandom(); spawnRandom();
-  renderAll(false);
+  score=0; lives=3; level=1;
+  drops=[]; particles=[]; dardos=[]; player=null;
+  mejoraPickups=[]; activeMejora=null; calmTimer=0;
+  gameState='start'; stateTimer=120;
+  updateHud();
+  startLoop();
 }
 
-function spawnRandom(){
-  const empty=[];
-  for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(!grid[r][c]) empty.push([r,c]);
-  if(!empty.length) return null;
-  const [r,c]=empty[Math.floor(Math.random()*empty.length)];
-  const id=cellId();
-  grid[r][c]={val:Math.random()<0.9?2:4, id, isNew:true};
-  return {r,c};
+function startLevel(){
+  player = {
+    x: W/2, y: FLOOR_Y() - PLAYER_H,
+    vx:0, vy:0, onGround:true,
+    dir:1, animFrame:0, animTimer:0,
+    invincible:0,
+  };
+  dardos = [];
+  particles = []; mejoraPickups = [];
+  calmTimer = 0;
+  drops = spawnDrops(level);
+  gameState = 'playing';
 }
 
-function setScore(v){
-  score=v; document.getElementById('scoreEl').textContent=v;
-}
-
-// ── MOVE LOGIC ────────────────────────────────────────────
-function doMove(dir){
-  if(busy) return;
-
-  const moves   = [];
-  const merges  = [];
-  let pts = 0;
-  let changed = false;
-
-  for(let line=0; line<N; line++){
-    let cells = [];
-    for(let i=0;i<N;i++){
-      let r,c;
-      if(dir==='left')  {r=line;c=i;}
-      if(dir==='right') {r=line;c=N-1-i;}
-      if(dir==='up')    {r=i;c=line;}
-      if(dir==='down')  {r=N-1-i;c=line;}
-      if(grid[r][c]) cells.push({...grid[r][c],r,c});
-    }
-
-    const result = [];
-    let i=0;
-    while(i<cells.length){
-      if(i+1<cells.length && cells[i].val===cells[i+1].val){
-        const newVal = cells[i].val*2;
-        const newId  = cellId();
-        pts += newVal;
-        result.push({val:newVal, id:newId, merged:true, kill:[cells[i].id,cells[i+1].id]});
-        i+=2;
-      } else {
-        result.push({...cells[i]});
-        i++;
-      }
-    }
-
-    while(result.length<N) result.push(null);
-
-    for(let j=0;j<N;j++){
-      let r,c;
-      if(dir==='left')  {r=line;c=j;}
-      if(dir==='right') {r=line;c=N-1-j;}
-      if(dir==='up')    {r=j;c=line;}
-      if(dir==='down')  {r=N-1-j;c=line;}
-
-      const cell = result[j];
-      if(!cell){ grid[r][c]=null; continue; }
-
-      if(cell.merged){
-        cell.kill.forEach(kid=>{
-          const orig = findCell(kid);
-          if(orig) moves.push({id:kid, fr:orig.r, fc:orig.c, tr:r, tc:c});
-        });
-        merges.push({id:cell.id, val:cell.val, r, c});
-        grid[r][c] = {val:cell.val, id:cell.id, isMerge:true};
-        changed = true;
-      } else {
-        if(cell.r!==r||cell.c!==c) changed=true;
-        moves.push({id:cell.id, fr:cell.r, fc:cell.c, tr:r, tc:c});
-        grid[r][c] = {val:cell.val, id:cell.id};
-      }
-    }
+function spawnDrops(lvl){
+  const ds = [];
+  // Config por ronda: [cantidad, índice de tamaño máx, multiplicador de velocidad]
+  // sizeIdx: 0=enorme, 1=grande, 2=mediana, 3=pequeña
+  const cfg = lvl===1 ? {count:1, si:1, spd:0.7} :
+              lvl===2 ? {count:1, si:0, spd:0.8} :
+              lvl===3 ? {count:2, si:1, spd:0.9} :
+              lvl===4 ? {count:2, si:0, spd:1.0} :
+              lvl===5 ? {count:3, si:1, spd:1.0} :
+                        {count:Math.min(2+Math.floor(lvl/2),5), si:Math.min(Math.floor(lvl/3),2), spd:1.0+lvl*0.03};
+  for(let i=0;i<cfg.count;i++){
+    const col = Math.floor(Math.random()*DROP_COLORS.length);
+    const si  = Math.min(cfg.si, DROP_SIZES.length-2);
+    const spd = (W*0.002 + Math.random()*W*0.0015) * cfg.spd;
+    ds.push(makeDrop(
+      W*(0.15+i*(0.7/Math.max(cfg.count-1,1))),
+      H*0.3,
+      (i%2===0?1:-1) * spd,
+      -DROP_SIZES[si].bounceVy() * 0.75,
+      si, col
+    ));
   }
+  return ds;
+}
 
-  if(!changed) return;
+function makeDrop(x,y,vx,vy,sizeIdx,colorIdx){
+  return { x, y, vx, vy: vy||0, sizeIdx, colorIdx,
+    wobble:0, wobbleV:0.08+Math.random()*0.04 };
+}
 
-  if(pts>0){
-    const ns = score+pts;
-    setScore(ns);
-    if(ns>best){ best=ns; localStorage.setItem('semillasBest',best); document.getElementById('bestEl').textContent=best; }
-    showScoreFloat('+'+pts);
-    document.getElementById('scoreEl').classList.remove('bump');
-    void document.getElementById('scoreEl').offsetWidth;
-    document.getElementById('scoreEl').classList.add('bump');
+// ── HUD ──────────────────────────────────────────────────
+function updateHud(){
+  document.getElementById('scoreEl').textContent = score;
+  const lv = document.getElementById('livesEl');
+  lv.innerHTML = '';
+  for(let i=0;i<lives;i++){
+    const s=document.createElement('span'); s.className='life'; s.textContent='❀'; lv.appendChild(s);
   }
-
-  busy = true;
-  board.querySelectorAll('.tile').forEach(t=>t.classList.add('moving'));
-
-  moves.forEach(m=>{
-    const el = tileEls[m.id];
-    if(el){ el.style.left=tileX(m.tc)+'px'; el.style.top=tileY(m.tr)+'px'; }
-  });
-
-  setTimeout(()=>{
-    board.querySelectorAll('.tile').forEach(t=>t.classList.remove('moving'));
-
-    const killIds = new Set();
-    merges.forEach(m=>{
-      moves.filter(mv=>mv.tr===m.r&&mv.tc===m.c).forEach(mv=>killIds.add(mv.id));
-    });
-    killIds.forEach(id=>{
-      if(tileEls[id]){ tileEls[id].remove(); delete tileEls[id]; }
-    });
-
-    merges.forEach(m=>{
-      const el=createTileEl(m.val, m.r, m.c, 'mergeflash');
-      tileEls[m.id]=el;
-      board.appendChild(el);
-    });
-
-    const nc = spawnRandom();
-    if(nc){
-      const cell = grid[nc.r][nc.c];
-      const el   = createTileEl(cell.val, nc.r, nc.c, 'spawn');
-      tileEls[cell.id] = el;
-      board.appendChild(el);
-    }
-
-    busy=false;
-    checkEnd();
-  }, ANIM_MS+20);
-}
-
-function findCell(id){
-  for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(grid[r][c]&&grid[r][c].id===id) return {r,c};
-  return null;
-}
-
-// ── RENDER ────────────────────────────────────────────────
-function createTileEl(val, r, c, animClass=''){
-  const el  = document.createElement('div');
-  el.className = 'tile'+(animClass?' '+animClass:'');
-  const st  = getCrecimientoStyle(val);
-  const fs  = val>=1000 ? CELL*0.30 : val>=100 ? CELL*0.34 : CELL*0.42;
-  el.style.cssText=`
-    left:${tileX(c)}px;top:${tileY(r)}px;
-    width:${CELL}px;height:${CELL}px;
-    background:${st.bg};color:${st.fg};
-    font-size:${fs}px;
-    box-shadow:${st.sh||'0 4px 12px rgba(0,0,0,0.35)'};
-    letter-spacing:-0.5px;
-  `;
-  el.textContent = val;
-  return el;
-}
-
-function renderAll(withAnim){
-  board.querySelectorAll('.tile').forEach(e=>e.remove());
-  tileEls={};
-  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
-    if(!grid[r][c]) continue;
-    const {val,id}=grid[r][c];
-    const el=createTileEl(val,r,c,withAnim?'spawn':'');
-    tileEls[id]=el;
-    board.appendChild(el);
-  }
-}
-
-// ── END CHECK ────────────────────────────────────────────
-function checkEnd(){
-  if(grid.flat().some(c=>c&&c.val===2048)){
-    showEnd(true); return;
-  }
-  for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(!grid[r][c]) return;
-  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
-    if(c<N-1&&grid[r][c]&&grid[r][c+1]&&grid[r][c].val===grid[r][c+1].val) return;
-    if(r<N-1&&grid[r][c]&&grid[r+1][c]&&grid[r][c].val===grid[r+1][c].val) return;
-  }
-  showEnd(false);
-}
-
-function showEnd(win){
-  document.getElementById('ovTitle').textContent = win?'🌳 ¡Árbol Despertado!':'🍂 Jardín Marchito';
-  document.getElementById('ovTitle').style.cssText = win
-    ? 'background:linear-gradient(135deg,#ca8a04,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent'
-    : 'color:#f59e0b';
-  document.getElementById('ovScore').textContent = 'Vitalidad: '+score;
-  overlay.classList.add('show');
-}
-
-// ── SCORE FLOAT ──────────────────────────────────────────
-function showScoreFloat(txt){
-  const el=document.createElement('div'); el.className='sfloat'; el.textContent=txt;
-  const r=board.getBoundingClientRect();
-  el.style.left=(r.left+r.width/2-18)+'px';
-  el.style.top =(r.top+r.height*0.38)+'px';
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),900);
 }
 
 // ── INPUT ────────────────────────────────────────────────
-const keys={};
-function setupBtn(id,dir){
+function setupBtn(id,key){
   const btn=document.getElementById(id);
-  const on=()=>{ keys[dir]=true; btn.classList.add('pressed'); };
-  const off=()=>{ keys[dir]=false; btn.classList.remove('pressed'); };
+  const on=()=>{keys[key]=true; btn.classList.add('pressed');};
+  const off=()=>{keys[key]=false; btn.classList.remove('pressed');};
   btn.addEventListener('mousedown',on); btn.addEventListener('mouseup',off); btn.addEventListener('mouseleave',off);
-  btn.addEventListener('touchstart',e=>{e.preventDefault();on();doMove(dir);},{passive:false});
-  btn.addEventListener('touchend',e=>{e.preventDefault();off();},{passive:false});
+  btn.addEventListener('touchstart',e=>{e.preventDefault();on();},{passive:false});
+  btn.addEventListener('touchend',  e=>{e.preventDefault();off();},{passive:false});
+  btn.addEventListener('touchcancel',e=>{e.preventDefault();off();},{passive:false});
 }
-setupBtn('btnU','up'); setupBtn('btnD','down'); setupBtn('btnL','left'); setupBtn('btnR','right');
+setupBtn('btnL','left');
+setupBtn('btnR','right');
+
+document.getElementById('dardoBtn').addEventListener('mousedown',()=>launchDardo());
+document.getElementById('dardoBtn').addEventListener('touchstart',e=>{e.preventDefault();launchDardo();},{passive:false});
 
 document.addEventListener('keydown',e=>{
-  const map={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',KeyW:'up',KeyS:'down',KeyA:'left',KeyD:'right'};
-  if(map[e.code]){ e.preventDefault(); doMove(map[e.code]); }
+  if(e.code==='ArrowLeft'||e.code==='KeyA'){e.preventDefault();keys.left=true;}
+  if(e.code==='ArrowRight'||e.code==='KeyD'){e.preventDefault();keys.right=true;}
+  if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();launchDardo();}
+  if(e.code==='Enter'&&gameState!=='playing'){e.preventDefault();handleStateAdvance();}
 });
-
-let sw0=null;
-board.addEventListener('touchstart',e=>{ sw0={x:e.touches[0].clientX,y:e.touches[0].clientY}; },{passive:true});
-board.addEventListener('touchend',e=>{
-  if(!sw0) return;
-  const dx=e.changedTouches[0].clientX-sw0.x, dy=e.changedTouches[0].clientY-sw0.y;
-  if(Math.max(Math.abs(dx),Math.abs(dy))<18) return;
-  doMove(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'));
-  sw0=null;
+document.addEventListener('keyup',e=>{
+  if(e.code==='ArrowLeft'||e.code==='KeyA') keys.left=false;
+  if(e.code==='ArrowRight'||e.code==='KeyD') keys.right=false;
 });
+canvas.addEventListener('click',()=>handleStateAdvance());
+canvas.addEventListener('touchstart',e=>{e.preventDefault();handleStateAdvance();},{passive:false});
 
-document.getElementById('ovBtn').addEventListener('click',()=>initGame());
+function handleStateAdvance(){
+  if(gameState==='start'||gameState==='levelclear') startLevel();
+  else if(gameState==='dead') { if(lives>0) startLevel(); else gameState='gameover'; }
+  else if(gameState==='gameover'){ score=0;lives=3;level=1;updateHud();startLevel(); }
+}
 
-window.addEventListener('load',()=>{ setTimeout(()=>{ layout(); initGame(); },80); });
-window.addEventListener('resize',()=>{ layout(); renderAll(false); });
+function launchDardo(){
+  if(gameState!=='playing') return;
+  const maxDardos = activeMejora?.id==='doble' ? 2 : 1;
+  if(dardos.length >= maxDardos) return;
+  const pw = activeMejora?.id==='ancho' ? 28 : (activeMejora?.id==='rayo' ? 4 : 3);
+  dardos.push({ x:player.x, y:player.y, tip:player.y, width:pw,
+    isRayo: activeMejora?.id==='rayo',
+    isEstallido: activeMejora?.id==='estallido' });
+}
+
+// ── GAME LOOP ────────────────────────────────────────────
+function startLoop(){ clearInterval(gameInterval); gameInterval=setInterval(tick,TICK_MS); }
+
+let frame=0;
+function tick(){
+  frame++;
+  if(gameState==='playing') update();
+  else { stateTimer--; }
+  draw();
+}
+
+// ── UPDATE ───────────────────────────────────────────────
+function update(){
+  // Movimiento del jugador
+  const spd = MOVE_SPD();
+  if(keys.left)  { player.vx = -spd; player.dir=-1; }
+  else if(keys.right){ player.vx = spd;  player.dir= 1; }
+  else           { player.vx *= 0.7; }
+
+  player.x += player.vx;
+  player.x = Math.max(PLAYER_W/2, Math.min(W-PLAYER_W/2, player.x));
+
+  // Gravedad
+  if(!player.onGround){ player.vy += GRAVITY(); }
+  player.y += player.vy;
+
+  // Piso
+  if(player.y >= FLOOR_Y()-PLAYER_H){
+    player.y = FLOOR_Y()-PLAYER_H;
+    player.vy = 0;
+    player.onGround = true;
+  } else { player.onGround = false; }
+
+  if(player.invincible>0) player.invincible--;
+
+  // Animación
+  player.animTimer++;
+  if(player.animTimer>6){ player.animFrame=(player.animFrame+1)%4; player.animTimer=0; }
+
+  // Dardos
+  const dardoSpd = activeMejora?.id==='rapido' ? DARDO_SPD()*2.2 : DARDO_SPD();
+  for(let di=dardos.length-1; di>=0; di--){
+    const dp=dardos[di];
+    dp.tip -= dardoSpd;
+    if(dp.tip <= 0){ dardos.splice(di,1); continue; }
+    for(let i=drops.length-1; i>=0; i--){
+      const d=drops[i];
+      const dr=DROP_SIZES[d.sizeIdx].r();
+      const hw=dp.width*0.5;
+      if(dp.x-hw < d.x+dr && dp.x+hw > d.x-dr && dp.tip < d.y+dr && d.y-dr < player.y){
+        if(dp.isRayo){
+          // rayo: revienta TODAS las gotas en la línea vertical
+          for(let j=drops.length-1;j>=0;j--){
+            if(Math.abs(drops[j].x - dp.x) < DROP_SIZES[drops[j].sizeIdx].r()+dp.width)
+              popDrop(j);
+          }
+          dardos.splice(di,1); break;
+        } else if(dp.isEstallido){
+          // estallido: revienta gotas dentro de un radio
+          const boomR = Math.min(W,H)*0.25;
+          for(let j=drops.length-1;j>=0;j--){
+            if(Math.hypot(drops[j].x-dp.x, drops[j].y-dp.tip) < boomR+DROP_SIZES[drops[j].sizeIdx].r()){
+              popDrop(j);
+            }
+          }
+          spawnEstallidoFlash(dp.x, dp.tip);
+          dardos.splice(di,1); break;
+        } else {
+          if(activeMejora?.id==='brisa'){
+            calmTimer=180; dardos.splice(di,1);
+            // destello suave en todas las gotas
+            drops.forEach(d=>spawnPopParticles(d.x,d.y,DROP_SIZES[d.sizeIdx].r()*0.3,d.colorIdx));
+            break;
+          }
+          popDrop(i);
+          dardos.splice(di,1); break;
+        }
+      }
+    }
+  }
+
+  // Efecto de calma
+  if(calmTimer>0) calmTimer--;
+
+  // Recolectables de mejora
+  for(let i=mejoraPickups.length-1;i>=0;i--){
+    const pk=mejoraPickups[i];
+    pk.y+=pk.vy; pk.vy+=0.15; pk.life--;
+    // rebote en el piso
+    if(pk.y > FLOOR_Y()-14){ pk.y=FLOOR_Y()-14; pk.vy=-Math.abs(pk.vy)*0.5; }
+    // recolección por el jugador
+    if(Math.hypot(player.x-pk.x, player.y+PLAYER_H/2-pk.y)<28){
+      activeMejora={id:pk.type, timer:600}; // 10s a 60fps
+      mejoraPickups.splice(i,1);
+      spawnCollectParticles(pk.x,pk.y,MEJORAS.find(m=>m.id===pk.type)?.color||'#fff');
+      continue;
+    }
+    if(pk.life<=0) mejoraPickups.splice(i,1);
+  }
+  // Cuenta regresiva de mejora activa
+  if(activeMejora){ activeMejora.timer--; if(activeMejora.timer<=0) activeMejora=null; }
+
+  // Física de las gotas
+  (drops||[]).forEach(d=>{
+    const r  = DROP_SIZES[d.sizeIdx].r();
+    d.wobble += d.wobbleV;
+    if(calmTimer>0) return;
+    d.vy    += GRAVITY() * 0.65;
+    d.x     += d.vx;
+    d.y     += d.vy;
+    // Rebote en paredes
+    if(d.x-r < 0)   { d.x=r;   d.vx= Math.abs(d.vx)*(0.95+Math.random()*0.1); }
+    if(d.x+r > W)   { d.x=W-r; d.vx=-Math.abs(d.vx)*(0.95+Math.random()*0.1); }
+    // Rebote en el piso
+    if(d.y+r >= FLOOR_Y()){
+      d.y  = FLOOR_Y()-r;
+      d.vy = -DROP_SIZES[d.sizeIdx].bounceVy() * (0.92+Math.random()*0.08);
+    }
+    // Techo
+    if(d.y-r < 0){ d.y=r; d.vy=Math.abs(d.vy)*0.6; }
+  });
+
+  // Colisión jugador vs gotas
+  if(player.invincible<=0){
+    for(const d of drops){
+      const r=DROP_SIZES[d.sizeIdx].r();
+      if(Math.hypot(player.x-d.x, player.y+PLAYER_H/2-d.y) < r+PLAYER_W*0.45){
+        playerDie(); return;
+      }
+    }
+  }
+
+  // Ronda completada
+  if(drops.length===0){
+    score += 500 + level*100;
+    level++;
+    updateHud();
+    gameState='levelclear'; stateTimer=90;
+  }
+
+  // Partículas
+  updateParticles();
+}
+
+function popDrop(i){
+  if(i<0||i>=drops.length) return;
+  const d  = drops[i];
+  const r  = DROP_SIZES[d.sizeIdx].r();
+  const pts= DROP_SIZES[d.sizeIdx].pts * (1 + Math.floor(level/3));
+  score += pts;
+  updateHud();
+  spawnPopParticles(d.x, d.y, r, d.colorIdx);
+
+  // Puede soltar una mejora (solo desde ronda 3+, 22% de probabilidad en gotas grandes)
+  const availMejoras = MEJORAS.filter(m=>m.minLevel<=level);
+  if(availMejoras.length>0 && d.sizeIdx<=1 && Math.random()<0.22 && !activeMejora){
+    const mj = availMejoras[Math.floor(Math.random()*availMejoras.length)];
+    mejoraPickups.push({x:d.x, y:d.y, vy:-3, life:300, type:mj.id, color:mj.color, icon:mj.icon, label:mj.label});
+  }
+
+  // Se divide en 2 más pequeñas
+  if(d.sizeIdx < DROP_SIZES.length-1){
+    const ns  = d.sizeIdx+1;
+    const spd = W*0.003 + Math.random()*W*0.002;
+    const dvy = -DROP_SIZES[ns].bounceVy() * 0.85;
+    drops.splice(i,1,
+      makeDrop(d.x, d.y, -spd, dvy, ns, d.colorIdx),
+      makeDrop(d.x, d.y,  spd, dvy, ns, d.colorIdx)
+    );
+  } else {
+    drops.splice(i,1);
+  }
+}
+
+function playerDie(){
+  lives--;
+  updateHud();
+  spawnDeathParticles(player.x, player.y+PLAYER_H/2);
+  gameState = lives>0 ? 'dead' : 'gameover';
+  stateTimer = 80;
+}
+
+// ── PARTÍCULAS ───────────────────────────────────────────
+function spawnEstallidoFlash(x,y){
+  for(let i=0;i<24;i++){
+    const a=Math.random()*Math.PI*2, sp=3+Math.random()*8;
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,
+      r:4+Math.random()*8,life:30,maxLife:30,color:i%2===0?'#ff8f4d':'#f4e04d',type:'pop'});
+  }
+}
+function spawnCollectParticles(x,y,col){
+  for(let i=0;i<12;i++){
+    const a=Math.random()*Math.PI*2, sp=2+Math.random()*4;
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,
+      r:3+Math.random()*4,life:22,maxLife:22,color:col,type:'pop'});
+  }
+}
+function spawnPopParticles(x,y,r,ci){
+  const cols = DROP_COLORS[ci%DROP_COLORS.length];
+  for(let i=0;i<18;i++){
+    const a=Math.random()*Math.PI*2, sp=2+Math.random()*r*0.18;
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,
+      r:3+Math.random()*5,life:25+Math.random()*20,maxLife:45,
+      color:cols[Math.floor(Math.random()*3)],type:'pop'});
+  }
+  // Texto flotante de puntos
+  particles.push({x,y:y-r,vx:0,vy:-1.5,r:0,life:30,maxLife:30,
+    text:'+'+DROP_SIZES[0].pts,color:'#e0a83e',type:'text'});
+}
+function spawnDeathParticles(x,y){
+  for(let i=0;i<16;i++){
+    const a=Math.random()*Math.PI*2, sp=2+Math.random()*4;
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,
+      r:3+Math.random()*4,life:25,maxLife:25,color:'#ff6f91',type:'pop'});
+  }
+}
+function updateParticles(){
+  if(!particles) return;
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    if(p.type!=='text'){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; }
+    else { p.y+=p.vy; }
+    p.life--;
+    if(p.life<=0) particles.splice(i,1);
+  }
+}
+
+// ── DIBUJO ───────────────────────────────────────────────
+function draw(){
+  // Fondo tipo cielo de prado
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#bfe6ff'); bg.addColorStop(1,'#ffe9c7');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Piso
+  drawFloor();
+
+  // Partículas (detrás del jugador)
+  drawParticles(false);
+
+  // Dardos
+  dardos.forEach(dp=>drawDardo(dp));
+
+  // Gotas
+  (drops||[]).forEach(d=>drawDrop(d));
+
+  // Jugador
+  if(gameState==='playing'||gameState==='dead'||gameState==='levelclear')
+    drawPlayer();
+
+  // Recolectables de mejora
+  drawMejoraPickups();
+  // Partículas (frente)
+  drawParticles(true);
+  // HUD de mejora activa
+  drawMejoraHUD();
+  // Overlay de calma (mejora "brisa")
+  if(calmTimer>0){
+    ctx.fillStyle=`rgba(180,220,255,${0.10+0.05*Math.sin(calmTimer*0.2)})`;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // Overlays de estado
+  if(gameState!=='playing') drawOverlay();
+}
+
+function drawFloor(){
+  // Pasto
+  const fg=ctx.createLinearGradient(0,FLOOR_Y()-8,0,H);
+  fg.addColorStop(0,'#8fbc5a'); fg.addColorStop(1,'#5a8f2e');
+  ctx.fillStyle=fg; ctx.fillRect(0,FLOOR_Y()-8,W,H-(FLOOR_Y()-8));
+  // Línea de brillo
+  ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2;
+  ctx.shadowColor='#ffffff'; ctx.shadowBlur=8;
+  ctx.beginPath(); ctx.moveTo(0,FLOOR_Y()-2); ctx.lineTo(W,FLOOR_Y()-2); ctx.stroke();
+  ctx.shadowBlur=0;
+  // Motas de flores en el pasto
+  ctx.fillStyle='rgba(255,255,255,0.35)';
+  for(let x=0;x<W;x+=24) for(let y=FLOOR_Y();y<H;y+=10){
+    ctx.beginPath(); ctx.arc(x,y,1,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function drawDrop(d){
+  const r   = DROP_SIZES[d.sizeIdx].r();
+  const col = DROP_COLORS[d.colorIdx%DROP_COLORS.length];
+  const wob = Math.sin(d.wobble)*r*0.06;
+
+  ctx.save();
+  ctx.translate(d.x, d.y);
+
+  // Sombra en el piso
+  const sy = FLOOR_Y()-2-d.y;
+  if(sy>0 && sy<H*0.7){
+    const alpha=Math.max(0,0.2*(1-sy/(H*0.6)));
+    ctx.fillStyle=`rgba(60,90,30,${alpha})`;
+    ctx.beginPath(); ctx.ellipse(0,sy,r*(0.5+0.3*(1-sy/(H*0.6))),r*0.15,0,0,Math.PI*2); ctx.fill();
+  }
+
+  ctx.shadowColor=col[0]; ctx.shadowBlur=r*0.5;
+
+  // Anillo exterior
+  const outerG=ctx.createRadialGradient(0,0,r*0.7,0,0,r*1.08);
+  outerG.addColorStop(0,'rgba(255,255,255,0)');
+  outerG.addColorStop(1,col[0]+'55');
+  ctx.fillStyle=outerG;
+  ctx.beginPath(); ctx.arc(0,0,r*1.08,0,Math.PI*2); ctx.fill();
+
+  // Cuerpo de la gota
+  const bodyG=ctx.createRadialGradient(-r*0.25,-r*0.28,r*0.02,r*0.1,r*0.1,r*1.1);
+  bodyG.addColorStop(0,'rgba(255,255,255,0.6)');
+  bodyG.addColorStop(0.15,col[0]+'dd');
+  bodyG.addColorStop(0.6, col[2]+'aa');
+  bodyG.addColorStop(1,   col[2]+'33');
+  ctx.fillStyle=bodyG;
+  ctx.beginPath();
+  ctx.arc(0,wob,r,0,Math.PI*2); ctx.fill();
+
+  // Borde
+  const rimG=ctx.createLinearGradient(-r,-r,r,r);
+  rimG.addColorStop(0,col[1]+'88'); rimG.addColorStop(1,col[0]+'44');
+  ctx.strokeStyle=rimG; ctx.lineWidth=r*0.06;
+  ctx.beginPath(); ctx.arc(0,wob,r,0,Math.PI*2); ctx.stroke();
+
+  // Brillo
+  const hg=ctx.createRadialGradient(-r*0.3,-r*0.35,0,-r*0.3,-r*0.35,r*0.45);
+  hg.addColorStop(0,'rgba(255,255,255,0.85)'); hg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=hg; ctx.beginPath(); ctx.arc(0,wob,r,0,Math.PI*2); ctx.fill();
+
+  // Destello pequeño
+  ctx.fillStyle='rgba(255,255,255,0.9)';
+  ctx.beginPath(); ctx.arc(-r*0.22,-r*0.3,r*0.1,0,Math.PI*2); ctx.fill();
+
+  ctx.shadowBlur=0;
+  ctx.restore();
+}
+
+function drawDardo(dp){
+  const x=dp.x, y1=player.y, y2=dp.tip;
+  const col = dp.isRayo?'#e05a76': dp.isEstallido?'#ff8f4d':
+              activeMejora?.id==='ancho'?'#e0a83e':
+              activeMejora?.id==='rapido'?'#f4e04d':'#ffd166';
+  ctx.shadowColor=col; ctx.shadowBlur=10;
+  const rg=ctx.createLinearGradient(0,y1,0,y2);
+  rg.addColorStop(0,col+'ee'); rg.addColorStop(1,col+'55');
+  ctx.strokeStyle=rg; ctx.lineWidth=dp.width||3; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+  if(dp.isRayo){
+    ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+  }
+  ctx.fillStyle='#fff'; ctx.shadowColor='#fff'; ctx.shadowBlur=14;
+  ctx.beginPath(); ctx.arc(x,y2,dp.isRayo?2:3.5,0,Math.PI*2); ctx.fill();
+  ctx.shadowBlur=0;
+}
+
+function drawPlayer(){
+  const x=player.x, y=player.y;
+  const alpha = player.invincible>0 ? (Math.floor(player.invincible/4)%2===0?0.35:1) : 1;
+  ctx.globalAlpha=alpha;
+  ctx.save(); ctx.translate(x,y+PLAYER_H/2);
+
+  // Sombra
+  ctx.fillStyle='rgba(60,90,30,0.3)';
+  ctx.beginPath(); ctx.ellipse(0,PLAYER_H/2+2,PLAYER_W*0.5,4,0,0,Math.PI*2); ctx.fill();
+
+  // Cuerpo
+  const bodyG=ctx.createLinearGradient(-PLAYER_W/2,-PLAYER_H/2,PLAYER_W/2,PLAYER_H/2);
+  bodyG.addColorStop(0,'#8fd18f'); bodyG.addColorStop(1,'#4a8f4a');
+  ctx.fillStyle=bodyG;
+  ctx.beginPath(); ctx.roundRect(-PLAYER_W/2,-PLAYER_H/2+6,PLAYER_W,PLAYER_H-8,6); ctx.fill();
+
+  // Gorro tipo pétalo
+  const helmG=ctx.createRadialGradient(-4,-PLAYER_H/2-2,2,0,-PLAYER_H/2,PLAYER_W*0.55);
+  helmG.addColorStop(0,'#ffffff'); helmG.addColorStop(0.3,'#ffb3c6'); helmG.addColorStop(1,'#ff6f91');
+  ctx.fillStyle=helmG;
+  ctx.beginPath(); ctx.arc(0,-PLAYER_H/2+4,PLAYER_W*0.52,Math.PI,Math.PI*2); ctx.fill();
+
+  // Antenitas
+  ctx.strokeStyle='#4a8f4a'; ctx.lineWidth=2; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-6,-PLAYER_H/2-2); ctx.lineTo(-9,-PLAYER_H/2-10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(6,-PLAYER_H/2-2); ctx.lineTo(9,-PLAYER_H/2-10); ctx.stroke();
+  ctx.fillStyle='#ff6f91';
+  ctx.beginPath(); ctx.arc(-9,-PLAYER_H/2-10,2.2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(9,-PLAYER_H/2-10,2.2,0,Math.PI*2); ctx.fill();
+
+  // Ojos
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(player.dir*5,-PLAYER_H/2+5,3.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#2e4a1a';
+  ctx.beginPath(); ctx.arc(player.dir*5+player.dir,-PLAYER_H/2+5,2,0,Math.PI*2); ctx.fill();
+
+  // Animación de piernas
+  const legAngle = keys.left||keys.right ? Math.sin(player.animFrame*1.5)*0.4 : 0;
+  ctx.strokeStyle='#5a8f2e'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-5,PLAYER_H/2-12); ctx.lineTo(-6+Math.sin(legAngle)*6, PLAYER_H/2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(5, PLAYER_H/2-12); ctx.lineTo( 6+Math.sin(-legAngle)*6,PLAYER_H/2); ctx.stroke();
+
+  // Pies
+  ctx.fillStyle='#8fd18f';
+  ctx.beginPath(); ctx.ellipse(-6+Math.sin(legAngle)*6, PLAYER_H/2+3, 7,4,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse( 6+Math.sin(-legAngle)*6,PLAYER_H/2+3, 7,4,0,0,Math.PI*2); ctx.fill();
+
+  // Brillo del cuerpo
+  ctx.fillStyle='rgba(255,255,255,0.2)';
+  ctx.beginPath(); ctx.roundRect(-PLAYER_W/2+4,-PLAYER_H/2+8,PLAYER_W*0.35,PLAYER_H*0.35,4); ctx.fill();
+
+  ctx.restore();
+  ctx.globalAlpha=1;
+}
+
+function drawParticles(front){
+  particles.forEach(p=>{
+    if(p.type==='text'){
+      if(!front) return;
+      ctx.globalAlpha=p.life/p.maxLife;
+      ctx.fillStyle=p.color;
+      ctx.font=`bold ${Math.max(12,W/25)}px 'Trebuchet MS',sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.shadowColor=p.color; ctx.shadowBlur=8;
+      ctx.fillText(p.text, p.x, p.y);
+      ctx.shadowBlur=0;
+      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    } else {
+      if(front) return;
+      ctx.globalAlpha=p.life/p.maxLife;
+      ctx.shadowColor=p.color; ctx.shadowBlur=6;
+      ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r*(p.life/p.maxLife),0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+    }
+    ctx.globalAlpha=1;
+  });
+}
+
+function drawMejoraPickups(){
+  mejoraPickups.forEach(pk=>{
+    const pulse=0.85+0.15*Math.sin(Date.now()*0.008);
+    const mj=MEJORAS.find(m=>m.id===pk.type);
+    const col=mj?mj.color:'#fff';
+    // Resplandor
+    ctx.shadowColor=col; ctx.shadowBlur=16*pulse;
+    // Fondo circular
+    const g=ctx.createRadialGradient(pk.x,pk.y,2,pk.x,pk.y,18);
+    g.addColorStop(0,col+'dd'); g.addColorStop(1,col+'22');
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.arc(pk.x,pk.y,18*pulse,0,Math.PI*2); ctx.fill();
+    // Borde
+    ctx.strokeStyle=col; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(pk.x,pk.y,18*pulse,0,Math.PI*2); ctx.stroke();
+    // Ícono
+    ctx.shadowBlur=0; ctx.font=`bold ${Math.floor(18*pulse)}px 'Trebuchet MS',sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#fff';
+    ctx.fillText(pk.icon||'✦',pk.x,pk.y);
+    // Etiqueta debajo
+    ctx.font=`bold ${Math.max(7,W/50)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillStyle='#fff'; ctx.shadowColor=col; ctx.shadowBlur=6;
+    ctx.fillText(pk.label||'',pk.x,pk.y+24);
+    ctx.shadowBlur=0;
+    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  });
+}
+
+function drawMejoraHUD(){
+  if(!activeMejora) return;
+  const mj=MEJORAS.find(m=>m.id===activeMejora.id);
+  if(!mj) return;
+  const pct=activeMejora.timer/600;
+  const bx=W/2-60, by=6, bw=120, bh=12;
+  // Fondo de barra
+  ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,6); ctx.fill();
+  // Relleno de barra
+  const g=ctx.createLinearGradient(bx,0,bx+bw,0);
+  g.addColorStop(0,mj.color); g.addColorStop(1,mj.color+'88');
+  ctx.fillStyle=g;
+  ctx.beginPath(); ctx.roundRect(bx,by,bw*pct,bh,6); ctx.fill();
+  // Ícono + etiqueta
+  ctx.font=`bold ${Math.max(9,W/30)}px 'Trebuchet MS',sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='#3a2a10'; ctx.shadowColor=mj.color; ctx.shadowBlur=6;
+  ctx.fillText(mj.icon+' '+mj.label, W/2, by+bh+10);
+  ctx.shadowBlur=0; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+}
+
+function drawOverlay(){
+  ctx.fillStyle='rgba(30,20,10,0.5)'; ctx.fillRect(0,0,W,H);
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+
+  if(gameState==='start'){
+    ctx.fillStyle='#ff6f91'; ctx.shadowColor='#ffb3c6'; ctx.shadowBlur=20;
+    ctx.font=`bold ${Math.max(22,W/9)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillText('🌼 BURBUJITAS',W/2,H*0.28);
+    ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.font=`${Math.max(11,W/22)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillText('◀▶ moverse  •  ↑ lanzar dardo de polen',W/2,H*0.45);
+    ctx.fillText('¡calma las gotas antes de que te salpiquen!',W/2,H*0.55);
+    blinkText('TOCA / ENTER PARA JUGAR',W/2,H*0.72,'#e0a83e');
+  } else if(gameState==='dead'){
+    ctx.fillStyle='#e05a76'; ctx.shadowColor='#ff6f91'; ctx.shadowBlur=18;
+    ctx.font=`bold ${Math.max(18,W/10)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillText('¡TE SALPICÓ UNA GOTA!',W/2,H*0.35);
+    ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.font=`${Math.max(11,W/22)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillText(`Vidas: ${lives}`,W/2,H*0.5);
+    blinkText('TOCA PARA CONTINUAR',W/2,H*0.68,'#e0a83e');
+  } else if(gameState==='levelclear'){
+    ctx.fillStyle='#5a8f2e'; ctx.shadowColor='#8fd18f'; ctx.shadowBlur=18;
+    ctx.font=`bold ${Math.max(18,W/10)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillText(`🌼 RONDA ${level-1} COMPLETADA!`,W/2,H*0.35);
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#e0a83e';
+    ctx.font=`${Math.max(13,W/20)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillText(`Puntos: ${score}`,W/2,H*0.5);
+    blinkText(`RONDA ${level} →`,W/2,H*0.68,'#fff');
+  } else if(gameState==='gameover'){
+    ctx.fillStyle='#e05a76'; ctx.shadowColor='#ff6f91'; ctx.shadowBlur=22;
+    ctx.font=`bold ${Math.max(22,W/8)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillText('JARDÍN TERMINADO',W/2,H*0.3);
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#e0a83e';
+    ctx.font=`bold ${Math.max(14,W/18)}px 'Trebuchet MS',sans-serif`;
+    ctx.fillText(`Puntaje Final: ${score}`,W/2,H*0.48);
+    blinkText('TOCA PARA REINICIAR',W/2,H*0.68,'#fff');
+  }
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+}
+
+function blinkText(txt,x,y,col){
+  if(Math.floor(Date.now()/550)%2===0){
+    ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=10;
+    ctx.font=`bold ${Math.max(12,W/22)}px 'Trebuchet MS',sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(txt,x,y);
+    ctx.shadowBlur=0;
+  }
+}
+
+// ── INICIALIZACIÓN INMEDIATA ──────────────────────────────
+// El script se ejecuta al final del <body>, así que el DOM y el layout
+// ya existen: inicializamos de inmediato en vez de depender únicamente
+// del evento 'load', que en algunos iframes puede no llegar a tiempo.
+resize();
+initGame();
+
+// Redes de seguridad adicionales por si el contenedor aún no tenía
+// su tamaño final en el primer frame de render.
+window.addEventListener('load', ()=>{ resize(); });
+window.addEventListener('resize', ()=>{ resize(); });
+setTimeout(()=>{ resize(); }, 300);
 </script>
 </body>
 </html>
